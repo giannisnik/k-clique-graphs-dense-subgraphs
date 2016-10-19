@@ -1,12 +1,12 @@
-# k-clique-graphs_dense_subgraphs
+# k-clique-graphs-dense-subgraphs
 
 Includes
 -----------
 
-- Greedy algorithm for the densest subgraph problem
+- Greedy algorithm for the densest subgraph problem.
   The algorithm appears in "Greedy approximation algorithms for finding dense components in a graph" In International Workshop on Approximation Algorithms for Combinatorial Optimization (pp. 84-95), 2000.
 
-- Greedy algorithm for the optimal quasi-clique problem
+- Greedy algorithm for the optimal quasi-clique problem.
   The algorithm appears in "Denser than the densest subgraph: extracting optimal quasi-cliques with quality guarantees" In Proceedings of the 19th International Conference on Knowledge Discovery and Data Mining (pp. 104-112), 2012.
 
 - Greedy algorithm for the triangle densest subgraph problem. 
