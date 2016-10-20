@@ -39,27 +39,3 @@ def triangle_density(G):
     """
 	t = nx.triangles(G)
 	return (sum(t.values())/3.0)/((G.number_of_nodes()*(G.number_of_nodes()-1)*(G.number_of_nodes()-2))/6.0)
-	
-	
-def triangle_graph_density(G):
-    """ 
-    Returns the density of the triangle-graph created using the input graph
-    """
-    sum_min_degs = 0
-    for node in G.nodes():
-        edges = G.edges(node)
-        r = 0
-        g = 0
-        b = 0
-        for edge in edges:
-            if G[edge[0]][edge[1]]['color'] == 'r':
-                r += 1
-            elif G[edge[0]][edge[1]]['color'] == 'g':
-                g += 1
-            elif G[edge[0]][edge[1]]['color'] == 'b':
-                b += 1
-            else:
-                print 'error'
-        sum_min_degs += min(r, g, b)
-
-    return float(sum_min_degs) / G.number_of_nodes()

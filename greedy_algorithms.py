@@ -9,7 +9,7 @@ Created on Thu Jul 20 2016
 import networkx as nx
 import sys
 from read import read_gml
-from evaluation_metrics import (density,degree_density,triangle_density,triangle_graph_density)
+from evaluation_metrics import (density,degree_density,triangle_density)
 
 def greedy_degree_density(G):
 	""" 
@@ -126,8 +126,8 @@ def greedy_quasi_cliques(G, alpha):
 
 def find_triangles(G):
 	""" 
-	For each node returns the number of triangles it's part of
-	and the pair of other nodes that form each triangle
+	For each node returns the number of triangles the node is part of
+	and the pair of other nodes that form each of these triangles
     """
 	triangles = {}
 	nbrs = {}
@@ -149,7 +149,7 @@ def find_triangles(G):
 	
 def greedy_triangle_density(G):
 	""" 
-	Optimizes the Tsourakakis's triangle density
+	Returns the subgraph with optimal triangle density
     """
 	triangles, nbrs = find_triangles(G)
 	sum_triangles = sum(triangles.values())
@@ -221,87 +221,70 @@ def greedy_triangle_density(G):
 	
 	
 def get_triangles(G):
-    triangles = {}
-    edges = {}
-    for edge in G.edges():
-        if edge[0] < edge[1]:
-            edges[(edge[0], edge[1])] = []
-        else:
-            edges[(edge[1], edge[0])] = []
-    ind = 0
-    done = set()
-    for n in G:
-        done.add(n)
-        nbrdone = set()
-        nbrs = set(G[n])
-        for nbr in nbrs:
-            if nbr in done:
-                continue
-            nbrdone.add(nbr)
-            for both in nbrs.intersection(G[nbr]):
-                if both in done or both in nbrdone:
-                    continue
-                triangles[ind] = sorted((n, nbr, both))
-                if n > nbr:
-                    edges[(nbr, n)].append(ind)
-                else:
-                    edges[(n, nbr)].append(ind)
-                if n > both:
-                    edges[(both, n)].append(ind)
-                else:
-                    edges[(n, both)].append(ind)
-                if both > nbr:
-                    edges[(nbr, both)].append(ind)
-                else:
-                    edges[(both, nbr)].append(ind)
-                ind += 1
-    return triangles, edges
-    
-    
-def create_triangle_graph(triangles, edges):
+	""" 
+	Lists all the triangles of the graph
 	"""
-	Creates the triangle-graph
-	"""
-	G = nx.DiGraph()
-	G.add_nodes_from(triangles.keys())
-	
-	for triangle in triangles:
-		for neighbor in edges[(triangles[triangle][0], triangles[triangle][1])]:
-			if neighbor != triangle:
-				G.add_edge(triangle, neighbor)
-				G[triangle][neighbor]['color'] = 'r'
-				
-		for neighbor in edges[(triangles[triangle][0], triangles[triangle][2])]:
-			if neighbor != triangle:
-				G.add_edge(triangle, neighbor)
-				G[triangle][neighbor]['color'] = 'g'
-				
-		for neighbor in edges[(triangles[triangle][1], triangles[triangle][2])]:
-			if neighbor != triangle:
-				G.add_edge(triangle, neighbor)
-				G[triangle][neighbor]['color'] = 'b'
-				
-	return G
+	triangles = {}
+	edges = {}
+	for edge in G.edges():
+		if edge[0] < edge[1]:
+			edges[(edge[0], edge[1])] = []
+		else:
+			edges[(edge[1], edge[0])] = []
+	ind = 0
+	done = set()
+	for n in G:
+		done.add(n)
+		nbrdone = set()
+		nbrs = set(G[n])
+		for nbr in nbrs:
+			if nbr in done:
+				continue
+			nbrdone.add(nbr)
+			for both in nbrs.intersection(G[nbr]):
+				if both in done or both in nbrdone:
+					continue
+				triangles[ind] = sorted((n, nbr, both))
+				if n > nbr:
+					edges[(nbr, n)].append(ind)
+				else:
+					edges[(n, nbr)].append(ind)
+				if n > both:
+					edges[(both, n)].append(ind)
+				else:
+					edges[(n, both)].append(ind)
+				if both > nbr:
+					edges[(nbr, both)].append(ind)
+				else:
+					edges[(both, nbr)].append(ind)
+				ind += 1
+	return triangles, edges
 
 
 def generate_triangle_neighbors(triangles, edges):
-    neighbors = {}
-    for triangle in triangles.keys():
-        neighbors[triangle] = {}
-        neighbors[triangle][(triangles[triangle][0], triangles[triangle][1])] = len(
-            edges[(triangles[triangle][0], triangles[triangle][1])]) - 1
-        neighbors[triangle][(triangles[triangle][0], triangles[triangle][2])] = len(
-            edges[(triangles[triangle][0], triangles[triangle][2])]) - 1
-        neighbors[triangle][(triangles[triangle][1], triangles[triangle][2])] = len(
-            edges[(triangles[triangle][1], triangles[triangle][2])]) - 1
+	""" 
+	For each triangle returns the triangles with which it shares a 
+	common edge 
+	"""
+	neighbors = {}
+	for triangle in triangles.keys():
+		neighbors[triangle] = {}
+		neighbors[triangle][(triangles[triangle][0], triangles[triangle][1])] = len(
+			edges[(triangles[triangle][0], triangles[triangle][1])]) - 1
+		neighbors[triangle][(triangles[triangle][0], triangles[triangle][2])] = len(
+			edges[(triangles[triangle][0], triangles[triangle][2])]) - 1
+		neighbors[triangle][(triangles[triangle][1], triangles[triangle][2])] = len(
+			edges[(triangles[triangle][1], triangles[triangle][2])]) - 1
 
-    return neighbors
+	return neighbors
     
     
 def greedy_triangle_graph_density(G):
-	
+	""" 
+	Returns the subgraph created by the subgraph of the triangle-graph
+	with optimal triangle-graph density
+    """
 	triangles, edges = get_triangles(G)
-	triangleG = create_triangle_graph(triangles, edges)
 	nbrs = generate_triangle_neighbors(triangles, edges)
 	
 	num_nodes = len(triangles)
@@ -385,9 +368,6 @@ def greedy_triangle_graph_density(G):
 
 	optimal_nodes = nodes[ind:]
 
-	subG = triangleG.subgraph(optimal_nodes)
-	tgd = triangle_graph_density(subG)
-
 	nodes = set()
 
 	for triangle in optimal_nodes:
@@ -397,66 +377,68 @@ def greedy_triangle_graph_density(G):
 		
 	subg = G.subgraph(nodes)
 	
-	return subg,tgd
+	return subg
 
 	
 def main():
-    filename = sys.argv[1]
-    if filename.split('.')[1] == 'gml':
-        G = read_gml('networks/' + filename)
-    else:
-        G = nx.read_edgelist('networks/' + filename, delimiter='\t', nodetype=int)
+	""" 
+	Main method
+	"""
+	filename = sys.argv[1]
+	if filename.split('.')[1] == 'gml':
+		G = read_gml('networks/' + filename)
+	else:
+		G = nx.read_edgelist('networks/' + filename, delimiter='\t', nodetype=int)
 
-    G = G.to_undirected()
+	G = G.to_undirected()
 
-    for node in G.nodes_with_selfloops():
-        G.remove_edge(node, node)
+	for node in G.nodes_with_selfloops():
+		G.remove_edge(node, node)
 
-    G1 = nx.Graph()
-    for edge in G.edges():
-        u = edge[0]
-        v = edge[1]
-        if u == v:
-            continue
-        if not G1.has_edge(u, v):
-            G1.add_edge(u, v, weight=1.0)
-	
-    G = G1
-    print "Number of nodes:", G.number_of_nodes()
-    print "Number of edges:", G.number_of_edges()
-    print
-    
-    subg = greedy_degree_density(G)
-    print "----Greedy Degree Density----"
-    print "Degree Density: " + str(degree_density(subg))
-    print "Density: " + str(density(subg))
-    print "Triangle Density: " + str(triangle_density(subg))
-    print "# Nodes: " + str(subg.number_of_nodes())
-    print
-    
-    subg = greedy_quasi_cliques(G, 0.333)
-    print "----Greedy Edge Surplus with alpha=1/3----"
-    print "Degree Density: " + str(degree_density(subg))
-    print "Density: " + str(density(subg))
-    print "Triangle Density: " + str(triangle_density(subg))
-    print "# Nodes: " + str(subg.number_of_nodes())
-    print
-    
-    subg = greedy_triangle_density(G)
-    print "----Greedy Triangle Density----"
-    print "Degree Density: " + str(degree_density(subg))
-    print "Density: " + str(density(subg))
-    print "Triangle Density: " + str(triangle_density(subg))
-    print "# Nodes: " + str(subg.number_of_nodes())
-    print
-    
-    subg,tgd = greedy_triangle_graph_density(G)
-    print "----Greedy Triangle-Graph Density----"
-    print "Degree Density: " + str(degree_density(subg))
-    print "Density: " + str(density(subg))
-    print "Triangle Density: " + str(triangle_density(subg))
-    print "Triangle-Graph Density: " + str(tgd)
-    print "# Nodes: " + str(subg.number_of_nodes())
+	G1 = nx.Graph()
+	for edge in G.edges():
+		u = edge[0]
+		v = edge[1]
+		if u == v:
+			continue
+		if not G1.has_edge(u, v):
+			G1.add_edge(u, v, weight=1.0)
+
+	G = G1
+	print "Number of nodes:", G.number_of_nodes()
+	print "Number of edges:", G.number_of_edges()
+	print
+
+	subg = greedy_degree_density(G)
+	print "----Greedy Degree Density----"
+	print "Degree Density: " + str(degree_density(subg))
+	print "Density: " + str(density(subg))
+	print "Triangle Density: " + str(triangle_density(subg))
+	print "# Nodes: " + str(subg.number_of_nodes())
+	print
+
+	subg = greedy_quasi_cliques(G, 0.333)
+	print "----Greedy Edge Surplus with alpha=1/3----"
+	print "Degree Density: " + str(degree_density(subg))
+	print "Density: " + str(density(subg))
+	print "Triangle Density: " + str(triangle_density(subg))
+	print "# Nodes: " + str(subg.number_of_nodes())
+	print
+
+	subg = greedy_triangle_density(G)
+	print "----Greedy Triangle Density----"
+	print "Degree Density: " + str(degree_density(subg))
+	print "Density: " + str(density(subg))
+	print "Triangle Density: " + str(triangle_density(subg))
+	print "# Nodes: " + str(subg.number_of_nodes())
+	print
+
+	subg = greedy_triangle_graph_density(G)
+	print "----Greedy Triangle-Graph Density----"
+	print "Degree Density: " + str(degree_density(subg))
+	print "Density: " + str(density(subg))
+	print "Triangle Density: " + str(triangle_density(subg))
+	print "# Nodes: " + str(subg.number_of_nodes())
 
 if __name__ == "__main__":
     main()
