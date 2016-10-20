@@ -13,7 +13,7 @@ Includes
   The algorithm appears in "The k-clique densest subgraph problem" In Proceedings of the 24th International Conference on World Wide Web (pp. 1122-1132), 2015.
 
 - Greedy algorithm for the triangle-graph densest subgraph problem.
-  The algorithm appears in
+  The algorithm appears in "K-clique-graphs for Dense Subgraph Discovery", https://arxiv.org/pdf/1610.06008.pdf
 
 Demo
 ------------ 
