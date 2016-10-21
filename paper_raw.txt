@@ -1,0 +1,475 @@
+Finding dense subgraphs in a graph is a fundamental graph
+mining task, with applications in several fields. Algorithms
+for identifying dense subgraphs are used in biology, in finance, in spam detection, etc. Standard formulations of
+this problem such as the problem of finding the maximum
+clique of a graph are hard to solve. However, some tractable
+formulations of the problem have also been proposed, focusing mainly on optimizing some density function, such as the
+degree density. However, maximization of degree density
+usually leads to large subgraphs with small density.
+In this paper, we introduce the k-clique-graph densest subgraph problem, k ≥ 3, a novel formulation for the discovery
+of dense subgraphs. Given an input graph, its k-clique-graph
+is a new graph created from the input graph where each vertex of the new graph corresponds to a k-clique of the input
+graph and two vertices are connected with an edge if they
+share a common k − 1-clique. We define a simple density
+function, the k-clique-graph density, which gives compact
+and at the same time dense subgraphs, and we project its
+resulting subgraphs back to the input graph. In this paper
+we focus on the triangle-graph densest subgraph problem
+obtained for k = 3. To optimize the proposed function, we
+provide two exact algorithms. Furthermore, we present an
+efficient greedy approximation algorithm that scales well to
+larger graphs.
+We evaluate the proposed algorithms on real datasets and
+compare them with other algorithms in terms of the size and
+the density of the extracted subgraphs. The results verify
+the ability of the proposed algorithms in finding high-quality
+subgraphs in terms of size and density.
+
+
+In recent years, graph-based representations have become
+extremely popular for modelling real-world data. Some examples of data represented as graphs include social networks, protein or gene regulation networks and textual documents. The problem of extracting dense subgraphs from
+such graphs has received a lot of attention due to its potential applications in many fields in the web
+graph, dense subgraphs may correspond to link spam [18]
+and hence, they can be used for spam detection. In bioinformatics, they are used for finding molecular complexes in
+protein-protein interaction networks [6] and for discovering
+motifs in genomic DNA [17]. In the field of finance, they
+are used for discovering migration motifs in financial markets [14]. Other applications include graph compression [10],
+graph visualization [1], real-time identification of important
+stories in Twitter [3] and community detection [12].
+Given an undirected, unweighted graph , we
+will denote the number of vertices and 
+the number of edges. Given a subset of vertices ,
+let be the set of edges that have both end-points in. Hence, is the subgraph induced by.
+The density of the set is
+, the number
+of edges in over the total possible edges. Finding the set that maximizes δ is not a meaningful problem, as density does not take into account the size of the subgraph. For
+example, a subgraph consisting of two vertices connected
+with an edge has higher density than a subgraph consisting
+of 100 vertices and all but one edge between them. However,
+clearly, we would prefer the latter subgraph from the former
+even if it achieves a lower value of density. Typically, the
+problem of dense subgraph discovery asks for a set of vertices which is large and which has high density. Several different
+functions have been proposed in the literature that aim to
+solve this problem. Some of these functions can be optimized
+in polynomial time, however, most of these formulations of
+extracting dense subgraphs are NP-hard and also hard to
+approximate.
+Recently, there was a growing interest in the extraction of
+subgraphs whose vertices are highly connected to each other
+[31, 7, 30]. However, existing methods do not always find subgraphs with high density. Instead, they prefer subgraphs with many vertices even if their density is not very
+high. In many cases, we are interested in discovering sets of
+vertices where there is an edge between almost all their pairs.
+In this paper, we introduce a new formulation for extracting dense subgraphs. We define a new family of functions
+for measuring the density of a subgraph and we provide exact and approximate algorithms that allow the extraction
+of large subgraphs with high density by maximizing these
+functions. Our contributions are fourfold:
+(i) New formulation: We introduce the k-clique-graph densest subgraph (k-clique-GDS) problem, a new formulation
+for finding large subgraphs with high density. Given a
+value for k, we create a graph whose vertices correspond
+to k-cliques of the original graph and we draw edges between two k-cliques if they share a common (k−1)-clique.
+We then extract a dense subgraph from the new graph
+and we project the result back to the original graph. We
+focus on the special case obtained for k = 3 which we
+call the triangle-graph densest subgraph (TGDS) problem. We define a new density function which is suited to
+the needs of our problem.
+(ii) Exact algorithms: We present two algorithms that solve
+exactly the TGDS problem. The first finds the optimal
+subgraph by solving a series of supermodular maximization problems, while the second is based on linear programming it formulates the problem as a
+linear program and computes the optimal subgraph based
+on the optimal solution to this linear program.
+(iii) Approximation algorithm: We propose an efficient
+greedy approximation algorithm for the TGDS problem
+which removes one vertex at each iteration. The algorithm achieves nearly-optimal results on real-world networks.
+(iv) Experimental evaluation: We evaluate our exact and
+approximation algorithms on several real-world networks.
+We compare the obtained subgraphs with those outputted
+by state-of-the-art algorithms and we observe that the
+proposed algorithms extract subgraphs of high quality.
+
+In this section, we review the related work published in the
+areas of Clique Finding, Dense Subgraph Discovery and Triangle Listing.
+Clique Finding. A clique is a graph whose vertices are
+all connected to each other. Hence, all cliques have density. A maximum clique of a graph is a clique, such that
+there is no clique with more vertices. Finding the maximum clique of a graph is an NP-complete problem [23]. The
+maximum clique problem is also hard to approximate. More
+specifically, Håstad showed in [21] that for any , there
+is no polynomial algorithm that approximates the maximum
+clique within a factor better than , unless NP has
+expected polynomial time algorithms.Feige presented in [15]
+a polynomial-time algorithm that approximates the maxi2
+mum clique within a ratio of. A maximal clique is a clique that is not included in a larger clique.
+The Bron–Kerbosch algorithm is a recursive backtracking
+procedure [9] that lists all maximal cliques in a graph in time.
+
+Dense Subgraph Discovery. The problem of finding a
+dense subgraph given an input graph has been widely studied in the literature [25]. As mentioned above, such a problem aims at finding a subset of vertices of an input
+graph that maximizes some notion of density. Among all
+the functions for evaluating dense subgraphs, degree density has gained increased popularity. The degree density of
+a set of vertices is defined as. The
+problem of finding the set of vertices that maximizes the
+degree density is known as the densest subgraph (DS) problem. The set of vertices that maximizes the degree
+density can be identified in polynomial time by solving a
+series of minimum-cut problems [19]. Charikar showed in
+[11] that the DS problem can also be formulated as a linear
+programming (LP) problem. In the same paper, the author
+proved that the greedy algorithm proposed by Asahiro et al.
+[5] provides a 12 -approximation to the DS problem in linear
+time.
+Some variations of the DS problem include the densest ksubgraph (DkS), the densest at-least-k-subgraph (DalkS) and
+the densest at-most-k-subgraph (DamkS) problems. These
+variations put restrictions on the size of the extracted subgraph. The DkS identifies the subgraph with exactly k vertices that maximizes the degree density and is known to be
+NP-complete [4]. Feige et al. provided in [16] an approximation algorithm with approximation ratio, where. The DalkS and DamkS problems were introduced
+by Andersen and Chellapilla [2]. The first problem asks for
+the subgraph of highest degree density among all subgraphs
+with at least k vertices and is known to be NP-hard [24],
+while the second problem asks for the subgraph of highest
+density among all subgraphs with at most k vertices and is
+known to be NP-complete [2].
+Tsourakakis introduced in [30] the k-clique densest subgraph (k-clique-DS) problem which generalizes the DS problem. The k-clique-DS problem maximizes the average number of k-cliques induced by a set all possible vertex subsets. For k = 3, we obtain the so-called triangle densest subgraph (TDS) problem which maximizes the triangle
+density defined as dtr  where is the number of triangles in S. The author provides two polynomialtime algorithms that identify the exact set of vertices that
+maximizes the triangle density and a approximation algorithm which runs asymptotically faster than any of the
+exact algorithms.
+There are several other recent algorithms that extract
+dense subgraphs by maximizing other notions of density
+[29, 31, 32]. It is worthwhile mentioning Tsourakakis et
+al.’s work [31]. The authors defined the optimal quasi-clique
+(OQC) problem which finds the subset of vertices
+that maximizes the function
+where is a constant. The OQC problem is not polynomialtime solvable and the authors provided a greedy approximation algorithm that runs in linear time and a local-search
+heuristic.
+Triangle Listing. Given a graph, the triangle listing
+problem reports all the triangles in. The triangle listing
+problem has been extensively studied and a large number
+of algorithms has been proposed [22, 13, 27]. A listing algorithm requires at least one operation per triangle. In the
+worst case, there are n3 triangles in terms of the number of
+vertices and in terms of the number of edges. Hence,
+in the worst case, it takes time just to report the triangles. The above algorithms require time to list
+the triangles and they are thus optimal in the worst case.
+Recently, Björklund et al. proposed output sensitive algorithms which run asymptotically faster when the number of
+triangles in the graph is small [8].
+
+
+In this section, we will introduce the k-clique-graph densest
+subgraph (k-clique-GDS) problem, a novel formulation for
+finding dense subgraphs. In the following, we will restrict
+ourselves to the case where, that is to triangles. At
+the end of the section, we will describe how the proposed
+approach can be generalized to the case of k-cliques,
+The cornerstone of the proposed method is the transformation of the input graph into another graph
+. The transformed graph G0 is a more abstract representation of G. Specifically, it encodes information regarding the triangles of the input graph G and the
+relationships between them.
+As a preprocessing step before applying the transformation, we assign labels to the edges of the input graph.
+Given a set of labels is a function that assigns
+labels to the edges of the graph. Each edge is assigned a
+unique label. Hence, the cardinality of the set L is equal
+to that of set . We next proceed with the
+transformation of into. The first step of the transformation procedure is to run a triangle listing algorithm.
+There are several available triangle listing algorithms which
+can be employed as described in Section 2. Let be
+the set of triangles extracted from. For each triangle, we create a vertex in the new graph. Therefore, each vertex represents one of the triangles extracted
+from. Pairs of triangles that share a common edge in
+are considered neighbors and are connected with an edge in. In other words, each edge in corresponds to a pair of
+triangles sharing the same edge. The edges of are also assigned labels. Each edge in is given the label of the edge
+that is shared between the two corresponding triangles in.
+For example, given a pair of triangles and
+where, these triangles have a
+common edge and the edge that links them in gets the same label as , that is. A triangle
+has three edges, hence, although it can have any number of
+adjacent edges in  , its labels come from a limited alphabet consisting of only three items (the labels of the three
+edges of the triangle in. We call the transformed graph the triangle-graph. Algorithm 1 describes the steps required to create G0 from G and Figure 1 illustrates how a
+graph containing 4 triangles is transformed into its triangle
+hypergraph.
+After creating the triangle-graph, we can find a subset
+of vertices that correponds to a dense subgraph.
+As mentioned earlier, each vertex represents a triangle t of the input graph. Each triangle is a set of
+three vertices. Intuitively, the union of the vertices of all
+the triangles that belong to the set will form a dense
+subgraph of. To extract the set of vertices , we can
+define a density measure and optimize it. A simple measure
+we can employ is the well-known degree density defined as. However, the above function will not
+necessarily lead to subgraphs with high density. Consider
+the two graphs shown in Figure 2. As can be seen from
+the Figure, the triangle-graphs emerging from the two input
+graphs are structurally equivalent, and hence, they have the
+same degree density. As a result, if the two graphs are components of a larger graph and there are no other subgraphs
+with higher value, they are equally likely solutions to the DS problem. However, it is obvious that the upper graph
+suits better our purpose, and we would like our algorithm
+to prefer this compared to the lower graph.
+To account for this problem, we define a new density measure which we call the triangle-graph density.
+Definition 1 (Triangle-Graph Density). Given an
+undirected, unweighted graph, construct its triangle graph For any , we define
+where its triangle-graph density as the set of labels of the
+edges adjacent to v (three labels at most), and
+the number of edges that are adjacent to v in the subgraph
+induced by and are assigned the label.
+The triangle-graph density will allow the discovery of subgraphs with high values of density. This is due to the fact
+that for each triangle in , the function takes into account
+the number of neighbors from all three edges of. If a triangle corresponding to the vertex shares one of its
+edges with many other triangles, but the other
+two edges with no triangles, then. Therefore, even if t has many neighbors, it contributes nothing
+to the triangle-graph density. Triangle-graph density seeks
+for subgraphs whose vertices belong to edges which all consist of large sets of vertices. Cliques are natural candidates
+for maximizing the function since all their edges are shared
+between several triangles.
+We next introduce the triangle-graph densest subgraph problem, the optimization problem we address in this paper.
+Problem 1 (TGDS problem). Given an undirected,
+unweighted graph, create its triangle-graph, and find a subset of vertices such that.
+After optimizing the triangle-graph density, we end up with
+a set of vertices and from these we obtain the set of
+vertices that corresponds to the resulting subgraph.
+The set consists of all the vertices that form the triangles in. It is clear that the TGDS problem can result
+in subgraphs with high values of density. What needs to
+be investigated is what are the properties of the extracted
+subgraphs and how they differ from the ones extracted from
+existing methods.
+The process of creating the k-clique graph for is
+similar to the one described above for to
+construct the k-clique graph, we first extract
+all the k-cliques from. Then for each k-clique in G, we create a vertex. Two vertices are connected
+with an edge if the corresponding cliques share a common
+(k−1)-clique in. For example, for, if two 4-cliques in
+G share a common triangle, an edge is drawn between them
+in. Each (k − 1)-clique in is assigned a unique label
+and the edges of the k-clique graph are assigned the labels
+of the (k − 1)-cliques that are shared between their two endpoints. Then, the k-clique-graph density and the k-cliquegraph densest subgraph (k-clique-GDS) problem are defined
+in a similar way as in the case of triangles. The algorithms
+presented in the next Section for maximizing triangle-graph
+density can be generalized to maximizing the k-clique-graph
+density. However, extracting k-cliques for is a computationally demanding task, and hence, we restrict ourselves
+to the case where.
+
+In this Section, we present some algorithms for solving the
+TGDS problem. These algorithms are inspired by previouslyintroduced algorithms in the field of dense subgraph discovery. we provide two algorithms that solve
+the TGDS problem exactly as well as a greedy approximation algorithm. In what follows, we assume that we have
+extracted all triangles from the input graph and we have
+created the triangle-graph. Note that, for simplicity of notation, from now on, we denote by the trianglegraph and not the input graph. We also denote by the
+minimum degree of vertex with respect to the three labels
+of its adjecent edges in the subgraph
+induced by, that is
+
+A Supermodular Maximization Approach
+
+In this Section, we provide an exact algorithm for finding the
+set of vertices S ∗ that maximizes the triangle-graph density.
+The algorithm is based on the supermodular maximization
+approach proposed by Tsourakakis in [30].
+maximizing the triangle-graph density can be cast as a supermodular maximization problem. We next introduce a
+brief background on submodularity and supermodularity.
+Submodular and supermodular functions are a class of
+functions with many useful properties which have found application in several real world problems. The main property
+of supermodular functions is that given two sets A and B,
+where, the difference in the incremental value
+of the function that a single element v makes when added to
+an input set increases as the size of the input set increases.
+Hence, the incremental value of adding v to sets A and B is
+larger for  compared to . Let V be a finite ground set.
+A function that maps subsets to a real
+value h(S) is called supermodular if the following equation
+holds for any 
+We next give a second equivalent definition of supermodularity. Let A, B be two sets such that and Then, function h is supermodular if
+This second form of supermodularity shows that the value
+added by a new element v never decreases when the context
+gets larger. Submodular and supermodular functions have
+gained increased popularity due to the fact that they can be
+minimized and maximized respectively in strongly polynomial time [28, 20]. More specifically, Orlin proposed in [26]
+an algorithm for maximizing an integer valued supermodular function f which runs in where EO is the
+time to evaluate for some.
+We next show that for any , the function defined by is supermodular.
+Theorem 1. Function where is supermodular.
+Proof. Let and. Let be a function defined as
+Function d takes as input a set of vertices, computes for
+each vertex its degrees with respect to the three labels,
+and returns the sum of the minimum degrees of the vertices.
+Given an input set, and two vertices and, let be a function that measures the incremental
+value of function when is added to the input set,
+that is. Then, it is linear to the number of vertices and number of edges
+of the triagle-graph. Let y denote the number of edges of
+the triagle-graph.
+The overall running time of Algorithm 2
+is thus 
+Since B is a superset of A, for any vertex . Notice also that, hence, Finally, and therefore,
+is a supermodular function. Furthermore, for any 
+the function is supermodular. Hence, since function is the sum of two supermodular functions, it is also supermodular.
+
+Lemma 1. Algorithm 2 solves the problem and runs in time.
+Proof. By solving a series of supermodular maximization problems, Algorithm 2 returns the subgraph that
+maximizes the objective function. At each step, the algorithm checks if there exists a set of vertices S such that the
+objective value of the induced subgraph is greater or equal
+to. To find the set of vertices that maximizes the
+objective function, the algorithm performs a binary search
+on the triangle hypergraph density value if
+the value val returned by the supermodular maximization
+algorithm is nonnegative, then
+
+To find the set of vertices that maximizes the triangle
+hypergraph density, we can use Algorithm 2. The algorithm
+terminates in logarithmic number of rounds. In each iteration, we run the Orlin-Supermodular-Opt procedure in order
+to find the set of vertices that maximize function h given the
+current value of parameter.
+Theorem 2. There exists an algorithm that solves the problem and runs in time
+where m is the number of edges of the input graph, t is the
+number of triangles in the input graph and y is the number
+of edges of the triangle-graph.
+To create the triangle-graph from the input graph, we first
+need to run a triangle listing algorithm. The one proposed
+by Itai and Rodeh runs in time [22]. As mentioned
+above, the algorithm will run in a logarithmic number of
+rounds. Furthermore, Orlin’s algorithm runs in time where n is the size of the ground set and EO is
+the time to evaluate for some [26]. In our case,
+the ground set corresponds to the vertices of the trianglegraph. Hence, it is equal to the number of triangles t in the
+input graph. As regards the complexity of computing,
+
+and there exists a set of vertices whose triangle-graph
+density value is greater or equal to. The set
+of vertices for which the value of the supermodular maximization algorithm is nonnegative, and for which
+the value of the triangle hypergraph density α is the largest
+among all sets of vertices corresponds to the optimal set.
+As regards the binary search, we set the upper and lower
+bounds and as follows. The lower bound is set equal to
+the triangle hypergraph density of the transformed graph,
+)
+hence. Furthermore, the triangle hypergraph
+sity of a set of vertices cannot be greater than
+that of a|V |-clique where each edge of each vertex has at
+vertices. Hence, we set the upper bound u equal
+. Therefore, the value of the triangle hyper
+least to graph density of the optimal set will lie between
+As regards the criterion to stop the binary search, it follows by observing that the smallest distance between two
+different possible values of the triangle hypergraph density
+is. The difference between two possible is
+A Greedy Approximation Algorithm
+In this Section, we provide an efficient algorithm for extracting a set of vertices with high value of triangle hypergraph density. The proposed algorithm is an
+adaptation of the greedy algorithm of Asahiro et al. [5]. The
+algorithm is illustrated as Algorithm 3. The algorithm iter-
+Let be the vertex whose minimum value of the three
+degrees
+Theorem 4. Let be the set of vertices returned after
+the execution of Algorithm 3 and let be the set of vertices of the optimal subgraph. Consider the iteration of the
+greedy algorithm just before the first vertex that belongs in
+the optimal set is removed, and let SI denote the vertex
+set currently kept in that iteration. Let also be the
+minimum degree of vertex in with respect to the three
+labels of its adjacent edges. Then, it holds that
+
+
+Proof. Given a subset of vertices and a vertex,
+let be the minimum degree of vertex v with respect to
+its three labels. Let also S ∗ be the vertices of the optimal
+subgraph. The optimal value of the function is obtained for
+the set of vertices S ∗ and is equal to
+Consider the iteration of the greedy algorithm just before
+the first vertex that belongs in the optimal set is removed. Let denote the set of vertices still present before
+the removal of. The value of the function for the set of
+vertices is then.
+Since, it holds that. In each iteration, the algorithm removes the
+vertex with the minimum degree with respect to the three
+labels of its adjacent edges. Since u is the first vertex to
+be removed by the algorithm, it is also easy to see that
+we made all graphs simple by ignoring the edge direction in
+the case of directed graphs and by removing self-loops and
+egde weights, if any. Table 1 shows statistics of these graphs.
+The first ten datasets were obtained from UCIrvine Network
+Data Repository1 , while the remaining datasets were obtained from Stanford SNAP Repository2 . We compared the proposed algorithms with algorithms that solve the densest
+optimal quasi-clique (OQC) problems. For the first two (DS
+and TDS problems) as well as for the proposed problem,
+there are algorithms that solve these problems exactly in
+polynomial time. Hence, for small-sized datasets, we present
+the results obtained from both the exact and greedy approxThe algorithm returns a set of nodes S which is the best
+imation algorithms for each problem. For larger datasets, we
+over all iterations, hence we obtain
+report only on the results achieved by the greedy approximation algorithms. As regards the objective function of the
+OQC problem, we set the value of parameter α equal to
+1/3 as suggested in [31]. All algorithms were implemented
+in Python3 and all experiments were conducted on a single
+machine with a 3.4GHz Intel Core i7 processor and 32GB
+From the above result, we can see that the bound provided
+of RAM. To assess the quality of the extracted subgraphs,
+by the approximation algorithm highly depends on the relawe employed the following measures: the density of the extionship between the size of the vertex set just before
+tracted subgraph
+, the density with re2
+the first vertex of is removed, and, the size of the
+spect to the number of triangles
+, that is
+optimal set. It also depends on the relationship between the
+the number of triangles in S over the total possible triangles,
+optimal value of the triangle-graph density and the
+and the size of the subgraph. The and measures take
+minimum degree of the first vertex of the optimal set
+values between and . The larger their value, the closer to be removed from with respect to its three labels.
+the subgraph to being a clique. Therefore, we are interested
+The difference between and, and between
+in finding large subgraphs (large value of) with and
+and is not very large in practice, and the algorithm
+values close to 1.
+leads to subgraphs with quality almost equal to that of the
+optimal subgraphs.
+
+EXPERIMENTS AND EVALUATION
+
+In this Section, we present the evaluation of the proposed
+approach for extracting dense subgraphs. We first give details about the datasets that we used for our experiments.
+We then present the employed experimental settings. And
+we last report on the results obtained by our approach and
+some other methods.
+
+Experimental Setup
+
+For the evaluation of the proposed algorithms, we employed
+several publicly available graphs. The algorithms are applicable to simple unweighted, undirected graphs. Hence,
+
+Results and Discussion
+
+Table 2 summarizes the results obtained on small-sized graphs.
+We observe that on the small-sized graphs, the proposed algorithms (Exact TGDS and Greedy TGDS) return in general subgraphs that are closer to being a clique compared
+to the competing algorithms. As we can see from the Table, the densities and of the subgraphs extracted by our
+algorithms are relatively high. Our initial intention was to
+design an algorithm for finding a set of vertices with many
+
+Table 2: Comparison of the extracted subgraphs by Goldberg’s exact algorithm for the DS problem (Exact
+DS), Charikar’s 12 approximation algorithm for the DS problem (Greedy DS), Tsourakakis’s algorithm for
+the TDS problem (Exact TDS), Tsourakakis’s 13 approximation algorithm for the TDS problem (Greedy
+TDS), Tsourakakis et al.’s greedy approximation algorithm for the OQC problem (Greedy OQC), our exact
+algorithm for the TGDS problem (Exact TGDS), and our greedy approximation algorithm for the TGDS
+problem (Greedy TGDS).
+
+Table 3: Comparison of the extracted subgraphs by Charikar’s 12 approximation algorithm for the DS problem
+(Greedy DS), Tsourakakis’s 13 approximation algorithm for the TDS problem (Greedy TDS), Tsourakakis et
+al.’s greedy approximation algorithm for the OQC problem (Greedy OQC), and our greedy approximation
+algorithm for the TGDS problem (Greedy TGDS).
+
+Table 4: Triangle-graph densities of the subgraphs
+extracted by the exact and the greedy approximation algorithms.
+edges between them. The obtained results verify our intuition that the proposed approach is capable of finding nearcliques. Furthermore, we show in Table 4 the triangle-graph
+density of the subgraphs extracted by the exact and the
+greedy approximation algorithm. We notice that on four
+out of the six graphs, the two densities are equal to each
+other, while on the other two, they are very close to each
+other. The obtained results indicate that the greedy algorithm achieves approximation ratios close to 1 on real-world
+networks. Hence, the approximation algorithm is nearlyoptimal in practice.
+Next, we present results obtained on larger graphs. Specifically, Table 3 compares the four approaches on 12 graphs.
+In general, the proposed algorithm still manages to extract
+subgraphs with high values of δ and τ . However, on three
+graphs (Amazon, roadNet-CA, roadNet-PA), it fails to discover high-quality subgraphs in terms of density. Overall,
+the Greedy DS algorithm returns the largest subgraphs, fol-
+
+lowed by the Greedy TDS algorithm, while the Greedy OQC
+algorithm and the proposed algorithm return smaller subgraphs with higher values of density. We notice that the
+subgraphs extracted by the proposed greedy approximation
+algorithm resemble most those extracted by the Greedy TDS
+algorithm. on five datasets, the two algorithms
+output exactly the same subgraphs to each other. On two
+datasets (ca-HepTh and ca-CondMat), all the algorithms
+extract the same subgraph. There are some large cliques
+hidden in these two graphs and all the algorithms manage
+to find them.
+
+
+In this paper, we propose a novel approach for extracting
+dense subgraphs. Given a graph, our algorithm first transforms it to a k-clique-graph. We then introduce a simple
+density measure to extract high-quality subgraphs, and we
+project the extracted subgraphs back to the input graph.
+We propose two algorithms for exactly maximizing the density function. We also present a greedy approximation algorithm. We evaluate our proposed approach for the case
+where on real graphs and we compare it with other
+popular measures for extracting dense subgraphs. Overall,
+our algorithms show good performance in finding large nearcliques, and can serve as useful additions to the list of dense
+subgraph discovery algorithms.
